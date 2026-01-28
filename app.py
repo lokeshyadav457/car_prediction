@@ -12,6 +12,23 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ---------------- CUSTOM CLASSES (if used in your pipeline) ----------------
+# Only keep this if your model used it; else ignore
+class MyCustomTransformer:
+    def fit(self, X, y=None):
+        return self
+    def transform(self, X):
+        return X
+
+# ---------------- LOAD MODEL FILES ----------------
+@st.cache_resource
+def load_model():
+    model = joblib.load("car_price_model.pkl")
+    scaler = joblib.load("scaler.pkl")
+    feature_names = joblib.load("feature_names.pkl")
+    return model, scaler, feature_names
+
+model, scaler, feature_names = load_model()
 # ---------------- LOAD DATA ----------------
 @st.cache_data
 def load_data():
@@ -19,16 +36,9 @@ def load_data():
     return df
 
 df = load_data()
-
-# ---------------- LOAD MODEL FILES ----------------
-model = joblib.load("car_price_model.pkl")
-scaler = joblib.load("scaler.pkl")
-feature_names = joblib.load("feature_names.pkl")
-
 # ---------------- SIDEBAR ----------------
 st.sidebar.title("📂 Navigation")
 menu = st.sidebar.radio("Go to", ["Overview", "EDA", "Model Metrics", "Prediction"])
-
 # ---------------- OVERVIEW ----------------
 if menu == "Overview":
     st.title("🚗 Car Price Prediction System")
@@ -49,7 +59,6 @@ if menu == "Overview":
 
     st.subheader("📊 Summary Statistics")
     st.dataframe(df.describe())
-
 # ---------------- EDA ----------------
 elif menu == "EDA":
     st.title("📊 Exploratory Data Analysis")
@@ -76,7 +85,6 @@ elif menu == "EDA":
     - Price decreases as kilometers driven increase  
     - Fuel type and transmission significantly affect price  
     """)
-
 # ---------------- MODEL METRICS ----------------
 elif menu == "Model Metrics":
     st.title("📈 Model Performance")
@@ -91,7 +99,6 @@ elif menu == "Model Metrics":
     - **RMSE:** Average prediction error  
     - **MAE:** Mean absolute difference  
     """)
-
 # ---------------- PREDICTION ----------------
 elif menu == "Prediction":
     st.title("🔮 Car Price Prediction")
